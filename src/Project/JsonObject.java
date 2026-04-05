@@ -14,6 +14,11 @@ public class JsonObject extends JsonElement {
         System.out.println("print object");
     }
 
+    @Override
+    protected JsonElement findPath(String path) {
+        return null;
+    }
+
     public void search(String key) {
         System.out.println("search in object: " + key);
     }
@@ -38,7 +43,15 @@ public class JsonObject extends JsonElement {
         System.out.println("save object");
     }
 
+    @Override
+    public void save(String filePath, String jsonPath) throws Exception {
+
+    }
+
     public void saveAs(String file, String path) {
         System.out.println("saveAs object");
+    }
+
+    public void parseContent(String json) {
     }
 }

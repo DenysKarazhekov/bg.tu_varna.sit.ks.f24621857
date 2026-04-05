@@ -14,6 +14,11 @@ public class JsonArray extends JsonElement {
         System.out.println("print array");
     }
 
+    @Override
+    protected JsonElement findPath(String path) {
+        return null;
+    }
+
     public void search(String key) {
         System.out.println("search in array: " + key);
     }
@@ -34,8 +39,18 @@ public class JsonArray extends JsonElement {
         System.out.println("move in array");
     }
 
+    @Override
+    protected void parseContent(String json) {
+
+    }
+
     public void save(String path) {
         System.out.println("save array");
+    }
+
+    @Override
+    public void save(String filePath, String jsonPath) throws Exception {
+
     }
 
     public void saveAs(String file, String path) {
