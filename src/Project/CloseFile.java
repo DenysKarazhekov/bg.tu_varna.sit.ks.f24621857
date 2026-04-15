@@ -8,13 +8,17 @@ public class CloseFile extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
+
         if (!cp.isFileOpened()) {
-            System.out.println("Error: no file opened");
+            System.out.println("Error: no file is opened");
             return true;
         }
 
-        System.out.println("Successfully closed " + cp.getCurrentFileName());
+        String fileName = cp.getCurrentFileName();
+
         cp.reset();
+
+        System.out.println("Closed: " + fileName);
 
         return true;
     }

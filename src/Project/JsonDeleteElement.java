@@ -8,17 +8,24 @@ public class JsonDeleteElement extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-       if (cp.requireFile() && cp.requireArgs(parts, 2, "Usage: delete <path>")) {
 
-            String path = parts[1];
-
-            try {
-                cp.getJsonElement().delete(path);
-                System.out.println("Successfully deleted element at [" + path + "]");
-            } catch (Exception e) {
-                System.out.println("Error: Could not delete element. " + e.getMessage());
-            }
+        if (!cp.requireFile()) {
+            return true;
         }
+
+        if (!cp.requireArgs(parts, 2, "Usage: delete <path>")) {
+            return true;
+        }
+
+        String path = parts[1];
+
+        try {
+            cp.getJsonElement().delete(path);
+            System.out.println("Deleted: " + path);
+        } catch (JsonException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
         return true;
     }
 }

@@ -8,8 +8,8 @@ public class JsonPrimitive extends JsonElement {
     private String value;
 
     public JsonPrimitive(String value) {
-        if (value == null) {
-            throw new JsonException("Primitive value cannot be null");
+        if (value == null || value.isBlank()) {
+            throw new JsonException("Primitive value cannot be empty");
         }
         this.value = value.trim();
     }
@@ -31,10 +31,14 @@ public class JsonPrimitive extends JsonElement {
 
     @Override
     public void save(String filePath, String jsonPath) {
+        if (jsonPath != null && !jsonPath.isEmpty()) {
+            throw new JsonException("Primitive has no sub-paths");
+        }
+
         try {
             save(filePath);
         } catch (IOException e) {
-            throw new JsonException("Error saving primitive: " + e.getMessage());
+            throw new JsonException("Error saving primitive");
         }
     }
 
@@ -45,16 +49,13 @@ public class JsonPrimitive extends JsonElement {
 
     @Override
     protected JsonElement findPath(String path) {
-        if (path == null || path.isEmpty()) {
-            return this;
-        }
-        return null;
+        return (path == null || path.isEmpty()) ? this : null;
     }
 
     @Override
     public void validate() {
-        if (value == null) {
-            throw new JsonException("Primitive is null");
+        if (value == null || value.isBlank()) {
+            throw new JsonException("Primitive is empty");
         }
     }
 
@@ -64,14 +65,15 @@ public class JsonPrimitive extends JsonElement {
 
     @Override
     public void set(String path, String value) {
-        if (path == null || path.isEmpty()) {
-            if (value == null) {
-                throw new JsonException("New value cannot be null");
-            }
-            this.value = value;
-        } else {
+        if (path != null && !path.isEmpty()) {
             throw new JsonException("Invalid path for primitive");
         }
+
+        if (value == null || value.isBlank()) {
+            throw new JsonException("Value cannot be empty");
+        }
+
+        this.value = value.trim();
     }
 
     @Override
@@ -81,28 +83,28 @@ public class JsonPrimitive extends JsonElement {
 
     @Override
     public void delete(String path) {
-        if (path == null || path.isEmpty()) {
-            this.value = null;
-        } else {
-            throw new JsonException("Invalid path for delete in primitive");
+        if (path != null && !path.isEmpty()) {
+            throw new JsonException("Invalid path for delete");
         }
+
+        this.value = null;
     }
 
     @Override
     public void move(String from, String to) {
-        throw new JsonException("Move operation not supported for primitive");
+        throw new JsonException("Move not supported for primitive");
     }
 
     @Override
     public void saveAs(String file, String path) {
-        if (path == null || path.isEmpty()) {
-            try {
-                save(file);
-            } catch (IOException e) {
-                throw new JsonException("Error saving file: " + e.getMessage());
-            }
-        } else {
-            throw new JsonException("Invalid path for primitive saveAs");
+        if (path != null && !path.isEmpty()) {
+            throw new JsonException("Primitive has no sub-paths");
+        }
+
+        try {
+            save(file);
+        } catch (IOException e) {
+            throw new JsonException("Error saving file");
         }
     }
 }

@@ -12,13 +12,14 @@ public class OpenFile extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
+
         if (parts.length < 2) {
             System.out.println("Usage: open <file>");
             return true;
         }
 
         if (cp.isFileOpened()) {
-            System.out.println("Error: a file is already opened. Close it first.");
+            System.out.println("Error: file already opened");
             return true;
         }
 
@@ -26,33 +27,32 @@ public class OpenFile extends BaseCase {
         File file = new File(path);
 
         try {
+
             if (!file.exists()) {
                 file.createNewFile();
                 cp.setJsonElement(new JsonObject());
                 cp.getJsonElement().save(path);
-            } else {
-                String content = Files.readString(file.toPath()).trim();
+            }
 
-                if (content.isEmpty()) {
-                    cp.setJsonElement(new JsonObject());
-                } else {
-                    try {
-                        cp.setJsonElement(JsonElement.parse(content));
-                    } catch (Exception e) {
-                        System.out.println("Error: Invalid JSON format in file. " + e.getMessage());
-                        return true;
-                    }
-                }
+            String content = Files.readString(file.toPath()).trim();
+
+            if (content.isEmpty()) {
+                cp.setJsonElement(new JsonObject());
+            } else {
+                JsonElement parsed = JsonElement.parse(content);
+                cp.setJsonElement(parsed);
             }
 
             cp.setCurrentFilePath(path);
             cp.setCurrentFileName(file.getName());
             cp.setFileOpened(true);
 
-            System.out.println("Successfully opened " + file.getName());
+            System.out.println("Opened: " + file.getName());
 
+        } catch (JsonException e) {
+            System.out.println("Error: invalid JSON - " + e.getMessage());
         } catch (IOException e) {
-            System.out.println("Error: Could not open or create file.");
+            System.out.println("Error: cannot open file");
         }
 
         return true;

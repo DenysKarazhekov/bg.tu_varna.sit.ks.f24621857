@@ -8,18 +8,37 @@ public class JsonSetElement extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-        if (cp.requireFile() && cp.requireArgs(parts, 3, "Usage: set <path> <string>")) {
 
-            String path = parts[1];
-            String newValue = cp.extractPath(input, parts, 2);
-
-            try {
-                cp.getJsonElement().set(path, newValue);
-                System.out.println("Successfully updated element at [" + path + "]");
-            } catch (Exception e) {
-               System.out.println("Error: Could not set value. " + e.getMessage());
-            }
+        if (!cp.requireFile()) {
+            return true;
         }
+
+        if (!cp.requireArgs(parts, 3, "Usage: set <path> <value>")) {
+            return true;
+        }
+
+        String path = parts[1];
+        String newValue = cp.extractPath(input, parts, 2);
+
+        if (path == null || path.isBlank()) {
+            System.out.println("Error: path cannot be empty");
+            return true;
+        }
+
+        if (newValue == null || newValue.isBlank()) {
+            System.out.println("Error: value cannot be empty");
+            return true;
+        }
+
+        try {
+            cp.getJsonElement().set(path, newValue);
+            System.out.println("Updated: " + path);
+        } catch (JsonException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: update failed");
+        }
+
         return true;
     }
 }

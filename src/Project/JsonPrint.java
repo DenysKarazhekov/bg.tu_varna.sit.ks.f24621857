@@ -8,17 +8,18 @@ public class JsonPrint extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-        if (cp.requireFile()) {
-            try {
-                System.out.println("--- JSON Content ---");
 
-                cp.getJsonElement().print();
-
-                System.out.println("\n--------------------");
-            } catch (Exception e) {
-                System.out.println("Error while printing JSON: " + e.getMessage());
-            }
+        if (!cp.requireFile()) {
+            return true;
         }
+
+        try {
+            System.out.println("JSON:");
+            cp.getJsonElement().print();
+        } catch (JsonException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
         return true;
     }
 }

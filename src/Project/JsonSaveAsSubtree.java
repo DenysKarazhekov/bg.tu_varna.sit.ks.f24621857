@@ -1,7 +1,5 @@
 package Project;
 
-import java.io.File;
-
 public class JsonSaveAsSubtree extends BaseCase {
 
     public JsonSaveAsSubtree(CommandProcessor cp) {
@@ -10,7 +8,12 @@ public class JsonSaveAsSubtree extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-       if (!cp.requireFile() || !cp.requireArgs(parts, 3, "Usage: save as <file> [path]")) {
+
+        if (!cp.requireFile()) {
+            return true;
+        }
+
+        if (!cp.requireArgs(parts, 3, "Usage: save as <file> [path]")) {
             return true;
         }
 
@@ -18,16 +21,25 @@ public class JsonSaveAsSubtree extends BaseCase {
 
         try {
             if (parts.length > 3) {
-                String jsonSubPath = parts[3];
+                String jsonSubPath = cp.extractPath(input, parts, 3);
+
+                if (jsonSubPath == null || jsonSubPath.isBlank()) {
+                    System.out.println("Error: Invalid path");
+                    return true;
+                }
+
                 cp.getJsonElement().saveAs(newFilePath, jsonSubPath);
-                System.out.println("Subtree [" + jsonSubPath + "] successfully saved to " + new File(newFilePath).getName());
+                System.out.println("Saved subtree: " + jsonSubPath);
             }
             else {
                 cp.getJsonElement().save(newFilePath);
-                System.out.println("Full JSON successfully saved as " + new File(newFilePath).getName());
+                System.out.println("Saved full JSON: " + newFilePath);
             }
+
+        } catch (JsonException e) {
+            System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error: Could not save to " + newFilePath + ". " + e.getMessage());
+            System.out.println("Error: Could not save file");
         }
 
         return true;

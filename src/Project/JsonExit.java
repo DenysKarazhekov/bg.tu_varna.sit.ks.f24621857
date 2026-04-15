@@ -8,7 +8,7 @@ public class JsonExit extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-        System.out.println("Exiting the program...");
+        System.out.println("Exit");
         return false;
     }
 }

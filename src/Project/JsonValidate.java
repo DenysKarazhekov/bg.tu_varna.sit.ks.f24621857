@@ -8,15 +8,18 @@ public class JsonValidate extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
+
         if (!cp.requireFile()) {
             return true;
         }
 
         try {
             cp.getJsonElement().validate();
-            System.out.println("JSON is valid.");
+            System.out.println("Valid JSON");
+        } catch (JsonException e) {
+            System.out.println("Invalid JSON: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Invalid JSON format: " + e.getMessage());
+            System.out.println("Invalid JSON");
         }
 
         return true;

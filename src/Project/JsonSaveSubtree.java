@@ -8,22 +8,31 @@ public class JsonSaveSubtree extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
+
         if (!cp.requireFile()) {
             return true;
         }
 
         try {
-            if (parts.length == 1) {
+            if (parts.length < 2) {
                 cp.getJsonElement().save(cp.getCurrentFilePath());
-                System.out.println("Full JSON successfully saved to " + cp.getCurrentFileName());
+                System.out.println("Saved full JSON: " + cp.getCurrentFileName());
+                return true;
             }
-             else {
-                String jsonSubPath = parts[1];
-                cp.getJsonElement().save(cp.getCurrentFilePath(), jsonSubPath);
-                System.out.println("Subtree [" + jsonSubPath + "] successfully saved to " + cp.getCurrentFileName());
+            String jsonSubPath = parts[1];
+
+            if (jsonSubPath == null || jsonSubPath.isBlank()) {
+                System.out.println("Error: invalid path");
+                return true;
             }
+
+            cp.getJsonElement().save(cp.getCurrentFilePath(), jsonSubPath);
+            System.out.println("Saved subtree: " + jsonSubPath);
+
+        } catch (JsonException e) {
+            System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error: Could not save to " + cp.getCurrentFileName() + ". " + e.getMessage());
+            System.out.println("Error: Could not save file");
         }
 
         return true;
