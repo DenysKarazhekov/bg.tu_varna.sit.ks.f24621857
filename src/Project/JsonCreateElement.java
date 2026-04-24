@@ -13,16 +13,26 @@ public class JsonCreateElement extends BaseCase {
             return true;
         }
 
-        if (!cp.requireArgs(parts, 3, "Usage: create <path> <value>")) {
+        if (cp.requireArgs(parts, 3, "Usage: create <path> <value>")) {
             return true;
         }
 
         String path = parts[1];
         String value = cp.extractPath(input, parts, 2);
 
+        if (path.isBlank()) {
+            System.out.println("Error: path cannot be empty");
+            return true;
+        }
+
+        if (value == null || value.isBlank()) {
+            System.out.println("Error: value cannot be empty");
+            return true;
+        }
+
         try {
             cp.getJsonElement().create(path, value);
-            System.out.println("Created: " + path);
+            System.out.println("Successfully created " + path);
         } catch (JsonException e) {
             System.out.println("Error: " + e.getMessage());
         }

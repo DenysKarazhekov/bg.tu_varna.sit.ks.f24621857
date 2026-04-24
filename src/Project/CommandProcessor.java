@@ -12,6 +12,7 @@ public class CommandProcessor {
 
     private final OpenFile openFile = new OpenFile(this);
     private final CloseFile closeFile = new CloseFile(this);
+
     private final JsonSave jsonSaveFile = new JsonSave(this);
     private final JsonSaveAs jsonSaveAsFile = new JsonSaveAs(this);
     private final JsonExit jsonExitFile = new JsonExit(this);
@@ -30,10 +31,9 @@ public class CommandProcessor {
         printCommands();
     }
 
-
     public boolean process(String input) {
 
-        if (input == null || input.isBlank()) {
+        if (input == null) {
             return true;
         }
 
@@ -50,7 +50,6 @@ public class CommandProcessor {
 
         return processMain(input, parts, command);
     }
-
 
     private boolean processMain(String input, String[] parts, String command) {
 
@@ -71,7 +70,8 @@ public class CommandProcessor {
             case "json":
                 if (requireFile()) {
                     mode = Mode.JSON;
-                    System.out.println("Entered JSON mode");
+                    Main.clearConsole();
+                    printJsonHelp();
                 }
                 return true;
 
@@ -85,7 +85,6 @@ public class CommandProcessor {
         }
     }
 
-
     private boolean processJson(String input, String[] parts, String command) {
 
         if (!requireFile()) {
@@ -95,11 +94,12 @@ public class CommandProcessor {
         switch (command) {
 
             case "validate":
-                return jsonValidate.execute(input, parts);
+                jsonElement.validate();
+                return true;
 
             case "print":
-                return jsonPrint.execute(input, parts);
-
+                jsonElement.print();
+                return true;
             case "search":
                 return jsonSearchKey.execute(input, parts);
 
@@ -120,10 +120,11 @@ public class CommandProcessor {
 
             case "saveas":
                 return jsonSaveAsSubtree.execute(input, parts);
-
             case "back":
-                mode = Mode.MAIN;
                 System.out.println("Back to main menu");
+                mode = Mode.MAIN;
+                Main.clearConsole();
+                printCommands();
                 return true;
 
             case "help":
@@ -131,13 +132,13 @@ public class CommandProcessor {
                 return true;
 
             default:
-                System.out.println("Unknown JSON command. Type 'back' to leave JSON mode.");
+                System.out.println("Unknown JSON command");
                 return true;
         }
     }
 
-
     private String normalizeCommand(String[] parts) {
+
         String cmd = parts[0].toLowerCase();
 
         if (cmd.equals("save") && parts.length > 1 && parts[1].equalsIgnoreCase("as")) {
@@ -147,21 +148,31 @@ public class CommandProcessor {
         return cmd;
     }
 
-
     public boolean requireFile() {
+
         if (!fileOpened) {
             System.out.println("Error: no file opened");
             return false;
         }
+
         return true;
     }
-
     public boolean requireArgs(String[] parts, int count, String message) {
         if (parts.length < count) {
             System.out.println(message);
             return false;
         }
         return true;
+    }
+    public String extractPath(String input, String[] parts, int startIndex) {
+        int firstSpace = input.indexOf(' ');
+
+        String result = input.substring(firstSpace + 1).trim();
+        if (result.startsWith("\"") && result.endsWith("\"")) {
+            result = result.substring(1, result.length() - 1);
+        }
+
+        return result;
     }
 
     public void reset() {
@@ -171,12 +182,6 @@ public class CommandProcessor {
         jsonElement = null;
         mode = Mode.MAIN;
     }
-
-    public String extractPath(String input, String[] parts, int startIndex) {
-        int index = input.indexOf(parts[startIndex]);
-        return input.substring(index).trim();
-    }
-
 
     public boolean isFileOpened() { return fileOpened; }
     public void setFileOpened(boolean v) { fileOpened = v; }
@@ -193,37 +198,37 @@ public class CommandProcessor {
     public Mode getMode() { return mode; }
     public void setMode(Mode m) { mode = m; }
 
-    private void printCommands() {
-        System.out.println("Main commands:");
-        System.out.println("open <file>");
-        System.out.println("close");
-        System.out.println("save");
-        System.out.println("save as <file>");
-        System.out.println("json");
-        System.out.println("help");
-        System.out.println("exit");
+    public void printCommands() {
+        System.out.println("        Main commands:");
+        System.out.println("- open <file>");
+        System.out.println("- close");
+        System.out.println("- save");
+        System.out.println("- save as <file>");
+        System.out.println("- json command");
+        System.out.println("- help");
+        System.out.println("- exit");
     }
-    private void printHelp() {
-        System.out.println("The following commands are supported:");
-        System.out.println("open <file> opens <file>");
-        System.out.println("close closes currently opened file");
-        System.out.println("save saves the currently open file");
-        System.out.println("save as <file> saves the current file in <file>");
-        System.out.println("json enter JSON operations mode");
-        System.out.println("help prints this information");
-        System.out.println("exit exits the program");
+    public void printHelp() {
+        System.out.println("    The following commands are supported:");
+        System.out.println("open <file>    -   opens <file>");
+        System.out.println("close          -   closes currently opened file");
+        System.out.println("save           -   saves the currently open file");
+        System.out.println("save as <file> -   saves the current file in <file>");
+        System.out.println("json           -   enter JSON operations mode");
+        System.out.println("help           -   prints this information");
+        System.out.println("exit           -   exits the program");
     }
-    private void printJsonHelp() {
-        System.out.println("JSON mode commands:");
-        System.out.println("validate");
-        System.out.println("print");
-        System.out.println("search <key>");
-        System.out.println("set <path> <value>");
-        System.out.println("create <path> <value>");
-        System.out.println("delete <path>");
-        System.out.println("move <from> <to>");
-        System.out.println("save [path]");
-        System.out.println("save as <file> [path]");
-        System.out.println("back");
+    public void printJsonHelp() {
+        System.out.println("   JSON mode commands:");
+        System.out.println("- validate");
+        System.out.println("- print");
+        System.out.println("- search <key>");
+        System.out.println("- set <path> <value>");
+        System.out.println("- create <path> <value>");
+        System.out.println("- delete <path>");
+        System.out.println("- move <from> <to>");
+        System.out.println("- save [path]");
+        System.out.println("- save as <file> [path]");
+        System.out.println("- back");
     }
 }

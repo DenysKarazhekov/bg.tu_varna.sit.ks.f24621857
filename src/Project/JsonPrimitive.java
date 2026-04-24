@@ -1,110 +1,113 @@
 package Project;
 
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class JsonPrimitive extends JsonElement {
 
     private String value;
 
     public JsonPrimitive(String value) {
-        if (value == null || value.isBlank()) {
-            throw new JsonException("Primitive value cannot be empty");
+        this.value = clean(value);
+    }
+
+    private String clean(String v) {
+
+        if (v == null) {
+            return null;
         }
-        this.value = value.trim();
+
+        v = v.trim();
+
+        if (v.startsWith("\"") && v.endsWith("\"")) {
+            return v.substring(1, v.length() - 1);
+        }
+
+        return v;
     }
 
     @Override
     protected void parseContent(String json) {
+
         if (json == null || json.isBlank()) {
-            throw new JsonException("Invalid primitive value");
-        }
-        this.value = json.trim();
-    }
-
-    @Override
-    public void save(String filePath) throws IOException {
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write(value);
-        }
-    }
-
-    @Override
-    public void save(String filePath, String jsonPath) {
-        if (jsonPath != null && !jsonPath.isEmpty()) {
-            throw new JsonException("Primitive has no sub-paths");
+            throw new JsonException("Primitive is empty");
         }
 
-        try {
-            save(filePath);
-        } catch (IOException e) {
-            throw new JsonException("Error saving primitive");
-        }
+        this.value = clean(json);
     }
 
     @Override
     public void print() {
-        System.out.println(value);
-    }
 
-    @Override
-    protected JsonElement findPath(String path) {
-        return (path == null || path.isEmpty()) ? this : null;
+        if (value == null) {
+            System.out.print("null");
+            return;
+        }
+
+        System.out.print(value);
     }
 
     @Override
     public void validate() {
-        if (value == null || value.isBlank()) {
-            throw new JsonException("Primitive is empty");
-        }
+        System.out.println("validate primitive");
     }
 
     @Override
-    public void search(String key) {
+    public boolean search(String key) {
+        System.out.println("search in primitive");
+        return false;
     }
 
     @Override
     public void set(String path, String value) {
-        if (path != null && !path.isEmpty()) {
-            throw new JsonException("Invalid path for primitive");
-        }
-
-        if (value == null || value.isBlank()) {
-            throw new JsonException("Value cannot be empty");
-        }
-
-        this.value = value.trim();
+        System.out.println("set in primitive");
     }
 
     @Override
     public void create(String path, String value) {
-        throw new JsonException("Cannot create inside primitive");
+        System.out.println("create in primitive");
     }
 
     @Override
     public void delete(String path) {
-        if (path != null && !path.isEmpty()) {
-            throw new JsonException("Invalid path for delete");
-        }
-
-        this.value = null;
+        System.out.println("delete in primitive");
     }
 
     @Override
     public void move(String from, String to) {
-        throw new JsonException("Move not supported for primitive");
+        System.out.println("move in primitive");
+    }
+
+    @Override
+    public void save(String filePath) {
+        System.out.println("save primitive");
+    }
+
+    @Override
+    public void save(String filePath, String jsonSubPath) {
+        System.out.println("save primitive");
     }
 
     @Override
     public void saveAs(String file, String path) {
-        if (path != null && !path.isEmpty()) {
-            throw new JsonException("Primitive has no sub-paths");
+        System.out.println("saveAs primitive");
+    }
+
+    @Override
+    protected JsonElement findPath(String path) {
+
+        if (path == null || path.isEmpty()) {
+            return this;
         }
 
-        try {
-            save(file);
-        } catch (IOException e) {
-            throw new JsonException("Error saving file");
+        return null;
+    }
+    @Override
+    public String toString() {
+
+        if (value == null) return "null";
+
+        if (value.equals("true") || value.equals("false") || value.matches("-?\\d+")) {
+            return value;
         }
+
+        return "\"" + value + "\"";
     }
 }

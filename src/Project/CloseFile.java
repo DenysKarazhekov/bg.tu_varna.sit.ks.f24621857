@@ -9,6 +9,11 @@ public class CloseFile extends BaseCase {
     @Override
     public boolean execute(String input, String[] parts) {
 
+        if (parts.length > 1) {
+            System.out.println("Error: close command does not take arguments");
+            return true;
+        }
+
         if (!cp.isFileOpened()) {
             System.out.println("Error: no file is opened");
             return true;
@@ -18,7 +23,7 @@ public class CloseFile extends BaseCase {
 
         cp.reset();
 
-        System.out.println("Closed: " + fileName);
+        System.out.println("Successfully closed " + fileName);
 
         return true;
     }

@@ -1,0 +1,10 @@
+{
+  "name": "Denis",
+  "age": 20,
+  "student": true,
+  "grades": [5, 6, 5, 4],
+  "address": {
+    "city": "Varna",
+    "country": "Bulgaria"
+  }
+}

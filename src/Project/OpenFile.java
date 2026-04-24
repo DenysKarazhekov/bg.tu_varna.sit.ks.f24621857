@@ -1,6 +1,7 @@
 package Project;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -23,36 +24,52 @@ public class OpenFile extends BaseCase {
             return true;
         }
 
-        String path = cp.extractPath(input, parts, 1);
-        File file = new File(path);
+        String path = cp.extractPath(input, parts, 1).replace("\"", "").trim();
+
+        path = path.replace("\"", "").trim();
+
+        File file = new File(path).getAbsoluteFile();
 
         try {
 
-            if (!file.exists()) {
-                file.createNewFile();
-                cp.setJsonElement(new JsonObject());
-                cp.getJsonElement().save(path);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
             }
 
-            String content = Files.readString(file.toPath()).trim();
+            if (!file.exists()) {
+
+                file.createNewFile();
+
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.write("{}");
+                }
+
+                cp.setJsonElement(new JsonObject());
+                cp.setFileOpened(true);
+                cp.setCurrentFilePath(file.getAbsolutePath());
+                cp.setCurrentFileName(file.getName());
+
+                System.out.println("Created new JSON file: " + file.getName());
+                return true;
+            }
+
+            String content = Files.readString(file.toPath()).replace("\uFEFF", "").trim();
 
             if (content.isEmpty()) {
                 cp.setJsonElement(new JsonObject());
             } else {
-                JsonElement parsed = JsonElement.parse(content);
-                cp.setJsonElement(parsed);
+                cp.setJsonElement(JsonElement.parse(content));
             }
 
-            cp.setCurrentFilePath(path);
-            cp.setCurrentFileName(file.getName());
             cp.setFileOpened(true);
+            cp.setCurrentFilePath(file.getAbsolutePath());
+            cp.setCurrentFileName(file.getName());
 
             System.out.println("Opened: " + file.getName());
 
-        } catch (JsonException e) {
-            System.out.println("Error: invalid JSON - " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("Error: cannot open file");
+        } catch (JsonException | IOException e) {
+            System.out.println("Error: " + e.getMessage());
         }
 
         return true;

@@ -1,5 +1,8 @@
 package Project;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class JsonSave extends BaseCase {
 
     public JsonSave(CommandProcessor cp) {
@@ -13,13 +16,16 @@ public class JsonSave extends BaseCase {
             return true;
         }
 
-        try {
-            cp.getJsonElement().save(cp.getCurrentFilePath());
-            System.out.println("Saved: " + cp.getCurrentFileName());
-        } catch (JsonException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error: Cannot save file");
+        if (parts.length > 1) {
+            System.out.println("Error: save command does not take arguments");
+            return true;
+        }
+
+        try (FileWriter writer = new FileWriter(cp.getCurrentFilePath())) {
+            writer.write(cp.getJsonElement().toString());
+            System.out.println("Successfully saved " + cp.getCurrentFileName());
+        } catch (IOException e) {
+            System.out.println("Error: cannot save file");
         }
 
         return true;

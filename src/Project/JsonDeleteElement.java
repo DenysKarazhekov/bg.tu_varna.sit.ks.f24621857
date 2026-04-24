@@ -13,11 +13,16 @@ public class JsonDeleteElement extends BaseCase {
             return true;
         }
 
-        if (!cp.requireArgs(parts, 2, "Usage: delete <path>")) {
+        if (cp.requireArgs(parts, 2, "Usage: delete <path>")) {
             return true;
         }
 
         String path = parts[1];
+
+        if (path.isEmpty()) {
+            System.out.println("Error: Path cannot be empty.");
+            return true;
+        }
 
         try {
             cp.getJsonElement().delete(path);
