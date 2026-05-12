@@ -2,7 +2,6 @@ package Project;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 
 public class JsonSaveAsSubtree extends BaseCase {
 
@@ -12,31 +11,18 @@ public class JsonSaveAsSubtree extends BaseCase {
 
     @Override
     public boolean execute(String input, String[] parts) {
-
-        if (!cp.requireFile()) {
+        if (!cp.requireArgs(parts, 3, "Usage: save as <file> [path]")) {
             return true;
         }
-
-        if (parts.length < 3) {
-            System.out.println("Usage: save as <file> [path]");
-            return true;
-        }
-
-        String path = parts[2];
+        String filePath = cp.extractPath(input, parts, 2);
+        String output;
 
         try {
-
-            String output;
-
             if (parts.length == 3) {
                 output = cp.getJsonElement().toString();
-                System.out.println("Saved full JSON");
-            }
-
-            else {
+            } else {
                 String subPath = parts[3];
-
-                JsonElement subtree = cp.getJsonElement().findPath(subPath);
+                JsonElement subtree = cp.getJsonElement().getByPath(subPath);
 
                 if (subtree == null) {
                     System.out.println("Error: path not found");
@@ -44,31 +30,23 @@ public class JsonSaveAsSubtree extends BaseCase {
                 }
 
                 output = subtree.toString();
-                System.out.println("Saved subtree: " + subPath);
             }
 
-            writeFile(path, output);
+            File file = new File(filePath);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
 
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(output);
+            }
+
+            System.out.println("Successfully saved " + file.getName());
         } catch (Exception e) {
-            System.out.println("Error writing file: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
         return true;
-    }
-
-    private void writeFile(String path, String content) throws IOException {
-
-        File file = new File(path);
-
-        File parent = file.getParentFile();
-        if (parent != null && !parent.exists()) {
-            parent.mkdirs();
-        }
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(content);
-        }
-
-        System.out.println("File written: " + file.getAbsolutePath());
     }
 }

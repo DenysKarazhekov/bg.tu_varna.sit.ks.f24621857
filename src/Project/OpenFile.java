@@ -25,19 +25,14 @@ public class OpenFile extends BaseCase {
         }
 
         String path = cp.extractPath(input, parts, 1).replace("\"", "").trim();
-
-        path = path.replace("\"", "").trim();
-
         File file = new File(path).getAbsoluteFile();
 
         try {
-
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists()) {
-                parent.mkdirs();
-            }
-
             if (!file.exists()) {
+                File parent = file.getParentFile();
+                if (parent != null && !parent.exists()) {
+                    parent.mkdirs();
+                }
 
                 file.createNewFile();
 
@@ -66,7 +61,7 @@ public class OpenFile extends BaseCase {
             cp.setCurrentFilePath(file.getAbsolutePath());
             cp.setCurrentFileName(file.getName());
 
-            System.out.println("Opened: " + file.getName());
+            System.out.println("Successfully opened " + file.getName());
 
         } catch (JsonException | IOException e) {
             System.out.println("Error: " + e.getMessage());

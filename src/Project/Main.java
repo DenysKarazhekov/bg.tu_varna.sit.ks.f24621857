@@ -20,30 +20,25 @@ public class Main {
     }
 
     public static void main(String[] args) {
-
         CommandProcessor processor = new CommandProcessor();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-
             System.out.print("> ");
             String input = scanner.nextLine();
 
             if (input.isBlank()) {
                 clearConsole();
-
-                if (processor.getMode() == Mode.JSON) {
+                if (processor.isJsonMode()) {
                     processor.printJsonHelp();
                 } else {
                     processor.printCommands();
                 }
-
                 continue;
             }
 
-            boolean result = processor.process(input);
-
-            if (!result) {
+            boolean running = processor.process(input);
+            if (!running) {
                 break;
             }
         }

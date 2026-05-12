@@ -12,10 +12,6 @@ public class JsonSave extends BaseCase {
     @Override
     public boolean execute(String input, String[] parts) {
 
-        if (!cp.requireFile()) {
-            return true;
-        }
-
         if (parts.length > 1) {
             System.out.println("Error: save command does not take arguments");
             return true;

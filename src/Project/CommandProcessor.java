@@ -2,21 +2,17 @@ package Project;
 
 public class CommandProcessor {
 
-    private Mode mode = Mode.MAIN;
-
     private boolean fileOpened = false;
     private String currentFilePath;
     private String currentFileName;
-
     private JsonElement jsonElement;
+    private boolean jsonMode = false;
 
     private final OpenFile openFile = new OpenFile(this);
     private final CloseFile closeFile = new CloseFile(this);
-
-    private final JsonSave jsonSaveFile = new JsonSave(this);
-    private final JsonSaveAs jsonSaveAsFile = new JsonSaveAs(this);
-    private final JsonExit jsonExitFile = new JsonExit(this);
-
+    private final JsonSave jsonSave = new JsonSave(this);
+    private final JsonSaveAs jsonSaveAs = new JsonSaveAs(this);
+    private final JsonExit jsonExit = new JsonExit(this);
     private final JsonValidate jsonValidate = new JsonValidate(this);
     private final JsonPrint jsonPrint = new JsonPrint(this);
     private final JsonSearchKey jsonSearchKey = new JsonSearchKey(this);
@@ -32,7 +28,6 @@ public class CommandProcessor {
     }
 
     public boolean process(String input) {
-
         if (input == null) {
             return true;
         }
@@ -41,10 +36,10 @@ public class CommandProcessor {
         String command = normalizeCommand(parts);
 
         if ("exit".equals(command)) {
-            return jsonExitFile.execute(input, parts);
+            return jsonExit.execute(input, parts);
         }
 
-        if (mode == Mode.JSON) {
+        if (jsonMode) {
             return processJson(input, parts, command);
         }
 
@@ -52,33 +47,25 @@ public class CommandProcessor {
     }
 
     private boolean processMain(String input, String[] parts, String command) {
-
         switch (command) {
-
             case "open":
                 return openFile.execute(input, parts);
-
             case "close":
                 return closeFile.execute(input, parts);
-
             case "save":
-                return jsonSaveFile.execute(input, parts);
-
+                return jsonSave.execute(input, parts);
             case "saveas":
-                return jsonSaveAsFile.execute(input, parts);
-
+                return jsonSaveAs.execute(input, parts);
             case "json":
                 if (requireFile()) {
-                    mode = Mode.JSON;
+                    jsonMode = true;
                     Main.clearConsole();
                     printJsonHelp();
                 }
                 return true;
-
             case "help":
                 printHelp();
                 return true;
-
             default:
                 System.out.println("Unknown command");
                 return true;
@@ -86,51 +73,36 @@ public class CommandProcessor {
     }
 
     private boolean processJson(String input, String[] parts, String command) {
-
         if (!requireFile()) {
             return true;
         }
-
         switch (command) {
-
             case "validate":
-                jsonElement.validate();
-                return true;
-
+                return jsonValidate.execute(input, parts);
             case "print":
-                jsonElement.print();
-                return true;
+                return jsonPrint.execute(input, parts);
             case "search":
                 return jsonSearchKey.execute(input, parts);
-
             case "set":
                 return jsonSetElement.execute(input, parts);
-
             case "create":
                 return jsonCreateElement.execute(input, parts);
-
             case "delete":
                 return jsonDeleteElement.execute(input, parts);
-
             case "move":
                 return jsonMoveElement.execute(input, parts);
-
             case "save":
                 return jsonSaveSubtree.execute(input, parts);
-
             case "saveas":
                 return jsonSaveAsSubtree.execute(input, parts);
             case "back":
-                System.out.println("Back to main menu");
-                mode = Mode.MAIN;
+                jsonMode = false;
                 Main.clearConsole();
                 printCommands();
                 return true;
-
             case "help":
                 printJsonHelp();
                 return true;
-
             default:
                 System.out.println("Unknown JSON command");
                 return true;
@@ -138,25 +110,21 @@ public class CommandProcessor {
     }
 
     private String normalizeCommand(String[] parts) {
-
         String cmd = parts[0].toLowerCase();
-
         if (cmd.equals("save") && parts.length > 1 && parts[1].equalsIgnoreCase("as")) {
             return "saveas";
         }
-
         return cmd;
     }
 
     public boolean requireFile() {
-
         if (!fileOpened) {
             System.out.println("Error: no file opened");
             return false;
         }
-
         return true;
     }
+
     public boolean requireArgs(String[] parts, int count, String message) {
         if (parts.length < count) {
             System.out.println(message);
@@ -164,14 +132,16 @@ public class CommandProcessor {
         }
         return true;
     }
-    public String extractPath(String input, String[] parts, int startIndex) {
-        int firstSpace = input.indexOf(' ');
 
-        String result = input.substring(firstSpace + 1).trim();
+    public String extractPath(String input, String[] parts, int startIndex) {
+        int pos = 0;
+        for (int i = 0; i < startIndex; i++) {
+            pos = input.indexOf(' ', pos) + 1;
+        }
+        String result = input.substring(pos).trim();
         if (result.startsWith("\"") && result.endsWith("\"")) {
             result = result.substring(1, result.length() - 1);
         }
-
         return result;
     }
 
@@ -180,23 +150,37 @@ public class CommandProcessor {
         currentFilePath = null;
         currentFileName = null;
         jsonElement = null;
-        mode = Mode.MAIN;
+        jsonMode = false;
     }
 
-    public boolean isFileOpened() { return fileOpened; }
-    public void setFileOpened(boolean v) { fileOpened = v; }
+    public boolean isFileOpened(){
+        return fileOpened;
+    }
+    public void setFileOpened(boolean v){
+        fileOpened = v;
+    }
+    public String getCurrentFilePath(){
+        return currentFilePath;
+    }
+    public void setCurrentFilePath(String p){
+        currentFilePath = p;
+    }
+    public String getCurrentFileName(){
+        return currentFileName;
+    }
+    public void setCurrentFileName(String n){
+        currentFileName = n;
+    }
+    public JsonElement getJsonElement(){
+        return jsonElement;
+    }
+    public void setJsonElement(JsonElement j){
+        jsonElement = j;
+    }
 
-    public String getCurrentFilePath() { return currentFilePath; }
-    public void setCurrentFilePath(String p) { currentFilePath = p; }
-
-    public String getCurrentFileName() { return currentFileName; }
-    public void setCurrentFileName(String n) { currentFileName = n; }
-
-    public JsonElement getJsonElement() { return jsonElement; }
-    public void setJsonElement(JsonElement j) { jsonElement = j; }
-
-    public Mode getMode() { return mode; }
-    public void setMode(Mode m) { mode = m; }
+    public boolean isJsonMode(){
+        return jsonMode;
+    }
 
     public void printCommands() {
         System.out.println("        Main commands:");

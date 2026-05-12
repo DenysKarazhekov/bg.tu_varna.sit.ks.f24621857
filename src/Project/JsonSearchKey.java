@@ -9,28 +9,17 @@ public class JsonSearchKey extends BaseCase {
     @Override
     public boolean execute(String input, String[] parts) {
 
-        if (!cp.requireFile()) {
+        if (!cp.requireArgs(parts, 2, "Usage: search <key>")) {
             return true;
         }
 
-        if (cp.requireArgs(parts, 2, "Usage: search <key>")) {
-            return true;
-        }
-
-        String keyToSearch = parts[1];
-
-        if (keyToSearch.isBlank()) {
-            System.out.println("Error: key cannot be empty");
-            return true;
-        }
+        String key = parts[1];
 
         try {
-            boolean found = cp.getJsonElement().search(keyToSearch);
-
+            boolean found = cp.getJsonElement().search(key);
             if (!found) {
                 System.out.println("No matches found");
             }
-
         } catch (JsonException e) {
             System.out.println("Error: " + e.getMessage());
         }

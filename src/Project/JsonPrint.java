@@ -14,10 +14,6 @@ public class JsonPrint extends BaseCase {
             return true;
         }
 
-        if (!cp.requireFile()) {
-            return true;
-        }
-
         try {
             cp.getJsonElement().print();
         } catch (JsonException e) {
